@@ -567,6 +567,103 @@ document.addEventListener('DOMContentLoaded', () => {
     btf.addEventListenerPjax(window, 'scroll', tocScrollFn, { passive: true })
   }
 
+  const handleEncryption = () => {
+    const $cardTocLayout = document.getElementById('card-toc');
+    if (!$cardTocLayout) return;
+    const $tocContent = $cardTocLayout.querySelector('.toc-content');
+    if (!$tocContent) return;
+    // 检查是否存在加密内容容器
+    const $encryptContainer = document.getElementById('hexo-blog-encrypt');
+    // 如果没有加密容器，说明不是加密文章，直接显示TOC
+    if (!$encryptContainer) {
+      console.log('No encryption container found, showing TOC');
+      $tocContent.style.display = 'block';
+      $tocContent.style.visibility = 'visible';
+      return;
+    }
+    // 检查是否处于加密状态的核心逻辑
+    const isCurrentlyEncrypted = () => {
+      if (!$encryptContainer) return false;
+
+      // 1. 检查加密容器中是否有密码输入相关的元素
+      const hasPasswordInput = $encryptContainer.querySelector('input[type="password"]') !== null;
+      const hasEncryptScript = $encryptContainer.querySelector('script[name="hbeData"]') !== null;
+      const hasEncryptButton = $encryptContainer.querySelector('.hbe-button') !== null;
+      // 2. 检查加密容器是否显示加密状态（包含密码输入框）
+      const isShowingEncryptForm = hasPasswordInput || hasEncryptScript;
+      // 3. 检查是否有"Encrypt again"按钮（表示已解密状态）
+      const hasHideButton = Array.from($encryptContainer.querySelectorAll('.hbe-button'))
+        .some(btn => btn.textContent.includes('Encrypt again'));
+      console.log('Encryption detection:', {
+        hasPasswordInput,
+        hasEncryptScript,
+        hasEncryptButton,
+        isShowingEncryptForm,
+        hasHideButton
+      });
+      // 如果显示加密表单，说明处于加密状态；如果有"Encrypt again"按钮，说明已解密
+      return isShowingEncryptForm && !hasHideButton;
+    };
+    // 更新TOC显示状态
+    const updateTocVisibility = () => {
+      const encrypted = isCurrentlyEncrypted();
+      if (encrypted) {
+        $tocContent.style.display = 'none';
+        $tocContent.style.visibility = 'hidden';
+        console.log('TOC: Hidden (encrypted)');
+      } else {
+        $tocContent.style.display = 'block';
+        $tocContent.style.visibility = 'visible';
+        console.log('TOC: Shown (decrypted)');
+      }
+    };
+    // 处理解密完成事件
+    const handleDecryptEvent = () => {
+      setTimeout(() => {
+        console.log('Decrypt event received, checking TOC visibility');
+        updateTocVisibility();
+      }, 300); // 给解密过程足够时间完成
+    };
+    // 初始化：延迟检查并设置TOC状态，确保DOM完全加载
+    setTimeout(updateTocVisibility, 100);
+    // 如果当前处于加密状态，设置监听器
+    if (isCurrentlyEncrypted()) {
+      console.log('Article is encrypted, setting up TOC hide listeners');
+      // 监听解密事件
+      window.addEventListener('hexo-blog-decrypt', handleDecryptEvent);
+      // 监听加密容器的DOM变化
+      const observer = new MutationObserver((mutations) => {
+        let shouldCheck = false;
+        for (const mutation of mutations) {
+          if (mutation.type === 'childList' || mutation.type === 'attributes') {
+            shouldCheck = true;
+            break;
+          }
+        }
+        if (shouldCheck) {
+          if (!isCurrentlyEncrypted()) {
+            console.log('Decryption detected via DOM changes');
+            updateTocVisibility();
+            observer.disconnect();
+            window.removeEventListener('hexo-blog-decrypt', handleDecryptEvent);
+          }
+        }
+      });
+      observer.observe($encryptContainer, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['style', 'class', 'innerHTML']
+      });
+      // 60秒后自动清理
+      setTimeout(() => {
+        observer.disconnect();
+        window.removeEventListener('hexo-blog-decrypt', handleDecryptEvent);
+      }, 60000);
+    }
+  };
+  handleEncryption();     
+
   const handleThemeChange = mode => {
     const globalFn = window.globalFn || {}
     const themeChange = globalFn.themeChange || {}
