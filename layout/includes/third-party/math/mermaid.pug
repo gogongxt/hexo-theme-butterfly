@@ -46,6 +46,9 @@ script.
       window.loadMermaid ? runMermaidFn() : btf.getScript('!{url_for(theme.asset.mermaid)}').then(runMermaidFn)
     }
 
+    // 监听 hexo-blog-decrypt 事件，解密后渲染mermaid
+    window.addEventListener('hexo-blog-decrypt', loadMermaid);
+
     btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
     window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
   })()
