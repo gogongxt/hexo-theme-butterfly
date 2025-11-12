@@ -217,20 +217,26 @@ class LocalSearch {
 
   // Highlight the search words provided in the url in the text
   highlightSearchWords (body) {
-    const params = new URL(location.href).searchParams.get('highlight')
-    const keywords = params ? params.split(' ') : []
-    if (!keywords.length || !body) return
-    const walk = document.createTreeWalker(body, NodeFilter.SHOW_TEXT, null)
-    const allNodes = []
-    while (walk.nextNode()) {
-      if (!walk.currentNode.parentNode.matches('button, select, textarea, .mermaid')) allNodes.push(walk.currentNode)
+    // 使用高亮管理器来处理高亮
+    if (window.highlightManager) {
+      window.highlightManager.highlightSearchWords(body)
+    } else {
+      // 回退到原有方法
+      const params = new URL(location.href).searchParams.get('highlight')
+      const keywords = params ? params.split(' ') : []
+      if (!keywords.length || !body) return
+      const walk = document.createTreeWalker(body, NodeFilter.SHOW_TEXT, null)
+      const allNodes = []
+      while (walk.nextNode()) {
+        if (!walk.currentNode.parentNode.matches('button, select, textarea, .mermaid')) allNodes.push(walk.currentNode)
+      }
+      allNodes.forEach(node => {
+        const [indexOfNode] = this.getIndexByWord(keywords, node.nodeValue)
+        if (!indexOfNode.length) return
+        const slice = this.mergeIntoSlice(0, node.nodeValue.length, indexOfNode)
+        this.highlightText(node, slice, 'search-keyword')
+      })
     }
-    allNodes.forEach(node => {
-      const [indexOfNode] = this.getIndexByWord(keywords, node.nodeValue)
-      if (!indexOfNode.length) return
-      const slice = this.mergeIntoSlice(0, node.nodeValue.length, indexOfNode)
-      this.highlightText(node, slice, 'search-keyword')
-    })
   }
 }
 

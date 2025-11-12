@@ -45,6 +45,7 @@ search:
   local_search:
     hits_empty: '未找到符合您查询的内容：${query}'
     hits_stats: '共找到 ${hits} 篇文章'
+  clear_highlight: 取消高亮
 
 pagination:
   prev: 上一篇

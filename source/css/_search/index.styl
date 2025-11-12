@@ -214,6 +214,35 @@
   color: $search-keyword-highlight
   font-weight: 600
 
+// 取消高亮按钮样式
+#clear-highlight-button
+  display: inline-flex
+  align-items: center
+  margin-right: 8px
+  padding: 4px 8px
+  border-radius: 4px
+  background: var(--btn-bg)
+  color: var(--btn-color)
+  cursor: pointer
+  transition: all .2s ease
+  font-size: 0.9em
+
+  &:hover
+    background: var(--btn-hover-color)
+    transform: translateY(-1px)
+    color: $search-color
+
+  .clear-highlight
+    display: inline-flex
+    align-items: center
+    gap: 4px
+
+    i
+      font-size: 1em
+
+    span
+      white-space: nowrap
+
 .search-loading
   display: flex
   justify-content: center

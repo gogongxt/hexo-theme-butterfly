@@ -14,6 +14,10 @@ nav#nav
 
   #menus
     if theme.search.use
+      #clear-highlight-button(style='display: none;')
+        span.site-page.social-icon.clear-highlight
+          i.fas.fa-times.fa-fw
+          span= ' ' + _p('search.clear_highlight')
       #search-button
         span.site-page.social-icon.search
           i.fas.fa-search.fa-fw

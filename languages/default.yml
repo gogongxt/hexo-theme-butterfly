@@ -44,6 +44,7 @@ search:
   local_search:
     hits_empty: 'No results found for: ${query}'
     hits_stats: '${hits} articles found'
+  clear_highlight: 'Clear Highlight'
 
 pagination:
   prev: Previous
